@@ -20,6 +20,8 @@ namespace MudBlazor
         private bool _isTemporary;
         private bool _isPointerOver;
         private bool _isClosing;
+        private DateTime _enterTime;
+        private bool _isClosingPending;
 
         protected string Classname =>
             new CssBuilder("mud-menu")
@@ -388,14 +390,17 @@ namespace MudBlazor
             }
 
             _isPointerOver = true;
-
+            _enterTime = DateTime.Now;
+            if (ParentMenu != null)
+            {
+                ParentMenu._isPointerOver = true;
+                ParentMenu._enterTime = _enterTime;
+            }
+            
             if (Open || ActivationEvent != MouseEvent.MouseOver)
             {
                 return;
             }
-
-            if (ParentMenu != null)
-                ParentMenu._isPointerOver = true;
 
             await OpenMenuAsync(args, true);
         }
@@ -405,6 +410,8 @@ namespace MudBlazor
             if (!_isClosing)
             {
                 _isPointerOver = true;
+                if(ParentMenu != null)
+                    ParentMenu._isPointerOver = true;
             }
         }
 
@@ -425,6 +432,9 @@ namespace MudBlazor
 
             if (_isTemporary && ActivationEvent == MouseEvent.MouseOver)
             {
+                if (_isClosingPending)
+                    return;
+                _isClosingPending = true;
                 // Wait a bit to allow the cursor to move from the activator to the items popover.
                 await Task.Delay(100);
 
@@ -432,9 +442,17 @@ namespace MudBlazor
                 menu = this;
                 while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
                 {
+                    if (DateTime.Now - menu._enterTime <= TimeSpan.FromMilliseconds(150))
+                    {
+                        await Task.Delay(50);
+                        continue;
+                    }
+
                     await menu.CloseMenuAsync();
                     menu = menu.ParentMenu;
                 }
+
+                _isClosingPending = false;
             }
         }
 
