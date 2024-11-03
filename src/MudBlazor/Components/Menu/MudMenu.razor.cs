@@ -390,7 +390,7 @@ namespace MudBlazor
             }
 
             _isPointerOver = true;
-            _enterTime = DateTime.Now;
+            _enterTime = DateTime.UtcNow;
             if (ParentMenu != null)
             {
                 ParentMenu._isPointerOver = true;
@@ -442,7 +442,7 @@ namespace MudBlazor
                 menu = this;
                 while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
                 {
-                    if (DateTime.Now - menu._enterTime <= TimeSpan.FromMilliseconds(150))
+                    if (DateTime.UtcNow - menu._enterTime <= TimeSpan.FromMilliseconds(150))
                     {
                         await Task.Delay(50);
                         continue;
