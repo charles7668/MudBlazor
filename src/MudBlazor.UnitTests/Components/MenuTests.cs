@@ -450,11 +450,13 @@ namespace MudBlazor.UnitTests.Components
             comp.WaitForAssertion(() => mudMenus.Count.Should().Be(3));
             menu = mudMenus[1].WaitForElement(".mud-menu");
             await menu.TriggerEventAsync("onpointerenter", new PointerEventArgs());
+            await menu.TriggerEventAsync("onpointermove", new PointerEventArgs());
             comp.WaitForAssertion(() => mudMenus[1].Instance.Open.Should().BeTrue());
 
             // try to keep mouse enter
             var cancellationTokenSource = new CancellationTokenSource();
             var token = cancellationTokenSource.Token;
+
             _ = Task.Run(async () =>
             {
                 var menuItem = mudMenus[2].Find(".mud-menu");
