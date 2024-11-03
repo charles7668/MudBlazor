@@ -396,7 +396,7 @@ namespace MudBlazor
                 ParentMenu._isPointerOver = true;
                 ParentMenu._enterTime = _enterTime;
             }
-            
+
             if (Open || ActivationEvent != MouseEvent.MouseOver)
             {
                 return;
@@ -410,7 +410,7 @@ namespace MudBlazor
             if (!_isClosing)
             {
                 _isPointerOver = true;
-                if(ParentMenu != null)
+                if (ParentMenu != null)
                     ParentMenu._isPointerOver = true;
             }
         }
