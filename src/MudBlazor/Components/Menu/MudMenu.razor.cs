@@ -2,6 +2,7 @@
 // MudBlazor licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Interfaces;
@@ -20,7 +21,7 @@ namespace MudBlazor
         private bool _isTemporary;
         private bool _isPointerOver;
         private bool _isClosing;
-        private DateTime _enterTime;
+        private Stopwatch _pointerEnterStopWatch = new();
         private bool _isClosingPending;
 
         protected string Classname =>
@@ -390,11 +391,11 @@ namespace MudBlazor
             }
 
             _isPointerOver = true;
-            _enterTime = DateTime.UtcNow;
+            _pointerEnterStopWatch.Restart();
             if (ParentMenu != null)
             {
                 ParentMenu._isPointerOver = true;
-                ParentMenu._enterTime = _enterTime;
+                ParentMenu._pointerEnterStopWatch.Restart();
             }
 
             if (Open || ActivationEvent != MouseEvent.MouseOver)
@@ -442,7 +443,7 @@ namespace MudBlazor
                 menu = this;
                 while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
                 {
-                    if (DateTime.UtcNow - menu._enterTime <= TimeSpan.FromMilliseconds(150))
+                    if (menu._pointerEnterStopWatch.ElapsedMilliseconds <= 150)
                     {
                         await Task.Delay(50);
                         continue;
