@@ -437,15 +437,15 @@ namespace MudBlazor
                     return;
                 _isClosingPending = true;
                 // Wait a bit to allow the cursor to move from the activator to the items popover.
-                await Task.Delay(100);
+                await Task.Delay(MudGlobal.MenuDefaults.HoverDelay);
 
                 // Close the menu if, since the delay, the pointer hasn't re-entered the menu or the overlay was made persistent (because the activator was clicked).
                 menu = this;
                 while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
                 {
-                    if (menu._pointerEnterStopWatch.ElapsedMilliseconds <= 150)
+                    if (menu._pointerEnterStopWatch.ElapsedMilliseconds <= MudGlobal.MenuDefaults.HoverDelay + MudGlobal.MenuDefaults.PreventCloseWaitingTime)
                     {
-                        await Task.Delay(50);
+                        await Task.Delay(MudGlobal.MenuDefaults.PreventCloseWaitingTime);
                         continue;
                     }
 
