@@ -24,6 +24,11 @@ namespace MudBlazor
         private Stopwatch _pointerEnterStopWatch = new();
         private bool _isClosingPending;
 
+        /// <summary>
+        /// Close previous child menus when this menu open by new child menu
+        /// </summary>
+        private event EventHandler? ChildCosingEvent;
+
         protected string Classname =>
             new CssBuilder("mud-menu")
                 .AddClass(Class)
@@ -394,6 +399,7 @@ namespace MudBlazor
             _pointerEnterStopWatch.Restart();
             if (ParentMenu != null)
             {
+                ParentMenu.ChildCosingEvent?.Invoke(this, EventArgs.Empty);
                 ParentMenu._isPointerOver = true;
                 ParentMenu._pointerEnterStopWatch.Restart();
             }
@@ -436,17 +442,36 @@ namespace MudBlazor
                 if (_isClosingPending)
                     return;
                 _isClosingPending = true;
+                // Cancellation token for parent use , if parent menu open by another child menu
+                CancellationTokenSource cts = new();
+                if (ParentMenu != null)
+                    ParentMenu.ChildCosingEvent += OnParentCloseNotify;
                 // Wait a bit to allow the cursor to move from the activator to the items popover.
-                await Task.Delay(MudGlobal.MenuDefaults.HoverDelay);
+                try
+                {
+                    await Task.Delay(MudGlobal.MenuDefaults.HoverDelay, cts.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    // ignore if task canceled by parent
+                }
+
+                if (ParentMenu != null)
+                    ParentMenu.ChildCosingEvent -= OnParentCloseNotify;
 
                 // Close the menu if, since the delay, the pointer hasn't re-entered the menu or the overlay was made persistent (because the activator was clicked).
                 menu = this;
                 while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
                 {
-                    if (menu._pointerEnterStopWatch.ElapsedMilliseconds <= MudGlobal.MenuDefaults.HoverDelay + MudGlobal.MenuDefaults.PreventCloseWaitingTime)
+                    if (menu._pointerEnterStopWatch.ElapsedMilliseconds <= MudGlobal.MenuDefaults.HoverDelay +
+                        MudGlobal.MenuDefaults.PreventCloseWaitingTime)
                     {
-                        await Task.Delay(MudGlobal.MenuDefaults.PreventCloseWaitingTime);
-                        continue;
+                        // do not delay if canceled by parent
+                        if (menu != this || !cts.IsCancellationRequested)
+                        {
+                            await Task.Delay(MudGlobal.MenuDefaults.PreventCloseWaitingTime, CancellationToken.None);
+                            continue;
+                        }
                     }
 
                     await menu.CloseMenuAsync();
@@ -454,6 +479,11 @@ namespace MudBlazor
                 }
 
                 _isClosingPending = false;
+
+                void OnParentCloseNotify(object? sender, EventArgs args)
+                {
+                    cts.Cancel();
+                }
             }
         }
 
