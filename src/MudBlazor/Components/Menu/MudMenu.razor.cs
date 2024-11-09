@@ -21,7 +21,7 @@ namespace MudBlazor
         private bool _isTemporary;
         private bool _isPointerOver;
         private bool _isClosing;
-        private Stopwatch _pointerEnterStopWatch = new();
+        private readonly Stopwatch _pointerEnterStopWatch = new();
         private bool _isClosingPending;
 
         /// <summary>
@@ -446,9 +446,7 @@ namespace MudBlazor
                     return;
                 _isClosingPending = true;
                 _parentCancellationCts = new CancellationTokenSource();
-                var cancellationToken = _parentCancellationCts.Token;
-                if (ParentMenu != null)
-                    ParentMenu.ChildCosingEvent += OnParentCloseNotify;
+                RegisterParentCloseNotify(OnParentCloseNotify);
                 // Wait a bit to allow the cursor to move from the activator to the items popover.
                 try
                 {
@@ -456,11 +454,10 @@ namespace MudBlazor
                 }
                 catch (TaskCanceledException)
                 {
-                    // ignore if task canceled by parent
+                    // ignore if close is requested by parent menu
                 }
 
-                if (ParentMenu != null)
-                    ParentMenu.ChildCosingEvent -= OnParentCloseNotify;
+                UnregisterParentCloseNotify(OnParentCloseNotify);
 
                 // Close the menu if, since the delay, the pointer hasn't re-entered the menu or the overlay was made persistent (because the activator was clicked).
                 menu = this;
@@ -480,18 +477,44 @@ namespace MudBlazor
 
                 _isClosingPending = false;
 
-                bool IsWaitingNeeded(MudMenu menuItem)
-                {
-                    return menuItem._pointerEnterStopWatch.ElapsedMilliseconds <= MudGlobal.MenuDefaults.HoverDelay +
-                           MudGlobal.MenuDefaults.PreventCloseWaitingTime &&
-                           (menuItem != this || !cancellationToken.IsCancellationRequested);
-                }
-
-                void OnParentCloseNotify(object? sender, EventArgs args)
-                {
-                    _parentCancellationCts.Cancel();
-                }
+                _parentCancellationCts.Dispose();
             }
+        }
+
+        private void RegisterParentCloseNotify(EventHandler handler)
+        {
+            if (ParentMenu != null)
+                ParentMenu.ChildCosingEvent += handler;
+        }
+
+        private void UnregisterParentCloseNotify(EventHandler handler)
+        {
+            if (ParentMenu != null)
+                ParentMenu.ChildCosingEvent -= handler;
+        }
+
+        /// <summary>
+        /// If time elapsed since pointer enter is less than <see cref="MudGlobal.MenuDefaults.HoverDelay"/> + <see cref="MudGlobal.MenuDefaults.PreventCloseWaitingTime"/>, then waiting is needed.
+        /// Else, if menu item is this or close is requested by parent menu, then waiting is not needed.
+        /// </summary>
+        /// <param name="menuItem">Which menu item would be checked</param>
+        /// <returns>True if waiting is needed, otherwise false</returns>
+        private bool IsWaitingNeeded(MudMenu menuItem)
+        {
+            return menuItem._pointerEnterStopWatch.ElapsedMilliseconds <= MudGlobal.MenuDefaults.HoverDelay +
+                   MudGlobal.MenuDefaults.PreventCloseWaitingTime &&
+                   (menuItem != this || !_parentCancellationCts.Token.IsCancellationRequested);
+        }
+
+        /// <summary>
+        /// Parent menu sends a close request to this menu.
+        /// At this time, this menu should close even if the leave event is waiting.
+        /// </summary>
+        /// <param name="sender">Parent menu object</param>
+        /// <param name="args">Event arguments</param>
+        private void OnParentCloseNotify(object? sender, EventArgs args)
+        {
+            _parentCancellationCts.Cancel();
         }
 
         /// <summary>
