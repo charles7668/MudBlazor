@@ -478,6 +478,25 @@ namespace MudBlazor.UnitTests.Components
         }
 
         [Test]
+        public async Task MultiNest_MenuPointerLeave_OpenNextSubMenuClosePreviousSubMenu()
+        {
+            var comp = Context.RenderComponent<MenuTestNestWithQuicklyMouseMove>();
+            // open all sub menus
+            var mudMenus = comp.FindComponents<MudMenu>();
+            var menu = mudMenus[0].WaitForElement(".mud-menu");
+            comp.WaitForAssertion(() => mudMenus.Count.Should().Be(1));
+            await menu.TriggerEventAsync("onpointerenter", new PointerEventArgs());
+            comp.WaitForAssertion(() => mudMenus[0].Instance.Open.Should().BeTrue());
+            mudMenus = comp.FindComponents<MudMenu>();
+            comp.WaitForAssertion(() => mudMenus.Count.Should().Be(11));
+            var menuA = mudMenus[0].WaitForElement(".mud-menu");
+            var menuB = mudMenus[1].WaitForElement(".mud-menu");
+            await menuA.TriggerEventAsync("onpointerenter", new PointerEventArgs());
+            _ = menuA.TriggerEventAsync("onpointerleave", new PointerEventArgs());
+            _ = menuB.TriggerEventAsync("onpointerenter", new PointerEventArgs());
+        }
+
+        [Test]
         public async Task MultiNest_MenuPointerLeave_MenuPointerEnter_CheckOpenClose()
         {
             var comp = Context.RenderComponent<MenuTestNestWithMouseOver>();

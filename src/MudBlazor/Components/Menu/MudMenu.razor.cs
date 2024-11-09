@@ -29,6 +29,9 @@ namespace MudBlazor
         /// </summary>
         private event EventHandler? ChildCosingEvent;
 
+        // Cancellation token for parent use , if parent menu open by another child menu
+        private CancellationTokenSource _parentCancellationCts = new();
+
         protected string Classname =>
             new CssBuilder("mud-menu")
                 .AddClass(Class)
@@ -442,14 +445,14 @@ namespace MudBlazor
                 if (_isClosingPending)
                     return;
                 _isClosingPending = true;
-                // Cancellation token for parent use , if parent menu open by another child menu
-                CancellationTokenSource cts = new();
+                _parentCancellationCts = new CancellationTokenSource();
+                var cancellationToken = _parentCancellationCts.Token;
                 if (ParentMenu != null)
                     ParentMenu.ChildCosingEvent += OnParentCloseNotify;
                 // Wait a bit to allow the cursor to move from the activator to the items popover.
                 try
                 {
-                    await Task.Delay(MudGlobal.MenuDefaults.HoverDelay, cts.Token);
+                    await Task.Delay(MudGlobal.MenuDefaults.HoverDelay, _parentCancellationCts.Token);
                 }
                 catch (TaskCanceledException)
                 {
@@ -463,15 +466,12 @@ namespace MudBlazor
                 menu = this;
                 while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
                 {
-                    if (menu._pointerEnterStopWatch.ElapsedMilliseconds <= MudGlobal.MenuDefaults.HoverDelay +
-                        MudGlobal.MenuDefaults.PreventCloseWaitingTime)
+                    // If the parent menu is open again , then waiting few time to allow move event
+                    // But do not wait if the parent menu is open by another child menu
+                    if (IsWaitingNeeded(menu))
                     {
-                        // do not delay if canceled by parent
-                        if (menu != this || !cts.IsCancellationRequested)
-                        {
-                            await Task.Delay(MudGlobal.MenuDefaults.PreventCloseWaitingTime, CancellationToken.None);
-                            continue;
-                        }
+                        await Task.Delay(MudGlobal.MenuDefaults.PreventCloseWaitingTime, CancellationToken.None);
+                        continue;
                     }
 
                     await menu.CloseMenuAsync();
@@ -480,9 +480,16 @@ namespace MudBlazor
 
                 _isClosingPending = false;
 
+                bool IsWaitingNeeded(MudMenu menuItem)
+                {
+                    return menuItem._pointerEnterStopWatch.ElapsedMilliseconds <= MudGlobal.MenuDefaults.HoverDelay +
+                           MudGlobal.MenuDefaults.PreventCloseWaitingTime &&
+                           (menuItem != this || !cancellationToken.IsCancellationRequested);
+                }
+
                 void OnParentCloseNotify(object? sender, EventArgs args)
                 {
-                    cts.Cancel();
+                    _parentCancellationCts.Cancel();
                 }
             }
         }
