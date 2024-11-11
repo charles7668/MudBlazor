@@ -27,7 +27,7 @@ namespace MudBlazor
         /// <summary>
         /// Close previous child menus when this menu open by new child menu
         /// </summary>
-        private event EventHandler? ChildCosingEvent;
+        private event EventHandler? ChildCosing;
 
         // Cancellation token for parent use , if parent menu open by another child menu
         private CancellationTokenSource _parentCancellationCts = new();
@@ -402,7 +402,7 @@ namespace MudBlazor
             _pointerEnterStopWatch.Restart();
             if (ParentMenu != null)
             {
-                ParentMenu.ChildCosingEvent?.Invoke(this, EventArgs.Empty);
+                ParentMenu.ChildCosing?.Invoke(this, EventArgs.Empty);
                 ParentMenu._isPointerOver = true;
                 ParentMenu._pointerEnterStopWatch.Restart();
             }
@@ -446,7 +446,9 @@ namespace MudBlazor
                     return;
                 _isClosingPending = true;
                 _parentCancellationCts = new CancellationTokenSource();
-                RegisterParentCloseNotify(OnParentCloseNotify);
+                if (ParentMenu != null)
+                    ParentMenu.ChildCosing += OnParentCloseNotify;
+
                 // Wait a bit to allow the cursor to move from the activator to the items popover.
                 try
                 {
@@ -457,40 +459,36 @@ namespace MudBlazor
                     // ignore if close is requested by parent menu
                 }
 
-                UnregisterParentCloseNotify(OnParentCloseNotify);
+                if (ParentMenu != null)
+                    ParentMenu.ChildCosing -= OnParentCloseNotify;
 
-                // Close the menu if, since the delay, the pointer hasn't re-entered the menu or the overlay was made persistent (because the activator was clicked).
-                menu = this;
-                while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
-                {
-                    // If the parent menu is open again , then waiting few time to allow move event
-                    // But do not wait if the parent menu is open by another child menu
-                    if (IsWaitingNeeded(menu))
-                    {
-                        await Task.Delay(MudGlobal.MenuDefaults.PreventCloseWaitingTime, CancellationToken.None);
-                        continue;
-                    }
-
-                    await menu.CloseMenuAsync();
-                    menu = menu.ParentMenu;
-                }
+                await CloseMenuIfPointerNotReentered();
 
                 _isClosingPending = false;
-
                 _parentCancellationCts.Dispose();
             }
         }
 
-        private void RegisterParentCloseNotify(EventHandler handler)
+        /// <summary>
+        /// Close the menu if the pointer hasn't re-entered the menu after a delay.
+        /// </summary>
+        private async Task CloseMenuIfPointerNotReentered()
         {
-            if (ParentMenu != null)
-                ParentMenu.ChildCosingEvent += handler;
-        }
+            // Close the menu if, since the delay, the pointer hasn't re-entered the menu or the overlay was made persistent (because the activator was clicked).
+            var menu = this;
+            while (menu is { ActivationEvent: MouseEvent.MouseOver, _isPointerOver: false, _isTemporary: true })
+            {
+                // If the parent menu is open again , then waiting few time to allow move event
+                // But do not wait if the parent menu is open by another child menu
+                if (IsWaitingNeeded(menu))
+                {
+                    await Task.Delay(MudGlobal.MenuDefaults.PreventCloseWaitingTime, CancellationToken.None);
+                    continue;
+                }
 
-        private void UnregisterParentCloseNotify(EventHandler handler)
-        {
-            if (ParentMenu != null)
-                ParentMenu.ChildCosingEvent -= handler;
+                await menu.CloseMenuAsync();
+                menu = menu.ParentMenu;
+            }
         }
 
         /// <summary>
