@@ -3,6 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq.Expressions;
+using AngleSharp.Css.Dom;
 using Bunit;
 using FluentAssertions;
 using FluentValidation;
@@ -1671,6 +1672,22 @@ namespace MudBlazor.UnitTests.Components
 
             comp.SetParametersAndRender(p => p.Add(x => x.ReadOnly, true)); //no clear button when readonly
             comp.FindAll(".mud-input-clear-button").Count.Should().Be(0);
+        }
+
+        [Test]
+        public void AutoGrow_Test()
+        {
+            var comp = Context.RenderComponent<AutoGrowTextFieldTest>();
+            var textareas = comp.FindAll("textarea");
+            textareas.Count.Should().Be(2);
+            var inputs = comp.FindAll("input");
+            inputs.Count.Should().Be(2);
+            var denseInput = inputs
+                .FirstOrDefault(x => x.ClassList.Contains("mud-input-root-margin-dense"));
+            denseInput.Should().NotBeNull();
+            var denseTextArea = textareas
+                .FirstOrDefault(x => x.ClassList.Contains("mud-input-root-margin-dense"));
+            denseTextArea.Should().NotBeNull();
         }
 #nullable disable
     }
