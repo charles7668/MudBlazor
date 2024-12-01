@@ -1677,10 +1677,14 @@ namespace MudBlazor.UnitTests.Components
         public void TestAutoGrowPageTest()
         {
             var comp = Context.RenderComponent<TextFieldAutoGrowTest>();
-            comp.FindAll("input.mud-input-root-filled").Count.Should().Be(4);
-            comp.FindAll("textarea.mud-input-root-filled").Count.Should().Be(4);
-            comp.FindAll("input.mud-input-root-filled.mud-input-root-margin-dense").Count.Should().Be(2);
-            comp.FindAll("textarea.mud-input-root-filled.mud-input-root-margin-dense").Count.Should().Be(2);
+            comp.FindAll("input.mud-input-root-filled").Count.Should().Be(2);
+            comp.FindAll("textarea.mud-input-root-filled").Count.Should().Be(2);
+            comp.FindAll("input.mud-input-root-filled.mud-input-root-margin-dense").Count.Should().Be(1);
+            comp.FindAll("textarea.mud-input-root-filled.mud-input-root-margin-dense").Count.Should().Be(1);
+            comp.FindAll("input.mud-input-root-outlined").Count.Should().Be(2);
+            comp.FindAll("textarea.mud-input-root-outlined").Count.Should().Be(2);
+            comp.FindAll("input.mud-input-root-outlined.mud-input-root-margin-dense").Count.Should().Be(1);
+            comp.FindAll("textarea.mud-input-root-outlined.mud-input-root-margin-dense").Count.Should().Be(1);
         }
 #nullable disable
     }
