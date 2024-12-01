@@ -365,11 +365,14 @@
     }
 
     &.mud-input-root-filled {
-      margin: 27px 12px 10px;
+      box-sizing: border-box;
+      margin-top: 0;
+      margin-bottom: 0;
+      padding: 27px 12px 10px;
 
       &.mud-input-root-margin-dense {
-        margin-top: 23px;
-        margin-bottom: 6px;
+        padding-top: 23px;
+        padding-bottom: 6px;
       }
 
       &:-webkit-autofill {
@@ -378,12 +381,12 @@
       }
 
       &.mud-input-root-hidden-label {
-        margin-top: 18px;
-        margin-bottom: 19px;
+        padding-top: 18px;
+        padding-bottom: 19px;
 
         &.mud-input-root-margin-dense {
-          margin-top: 10px;
-          margin-bottom: 11px;
+          padding-top: 10px;
+          padding-bottom: 11px;
         }
       }
 
@@ -418,7 +421,10 @@
   }
 
   &.mud-input-root-outlined {
-    margin: 18.5px 14px;
+    box-sizing: border-box;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 18.5px 14px;
 
 
     &.mud-input-root:-webkit-autofill {
@@ -426,8 +432,8 @@
     }
 
     &.mud-input-root-margin-dense {
-      margin-top: 10.5px;
-      margin-bottom: 10.5px;
+      padding-top: 10.5px;
+      padding-bottom: 10.5px;
     }
 
     &.mud-input-root-adorned-start {
