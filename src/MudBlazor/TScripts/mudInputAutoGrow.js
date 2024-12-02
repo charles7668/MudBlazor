@@ -5,6 +5,7 @@ window.mudInputAutoGrow = {
     initAutoGrow: (elem, maxLines) => {
         const compStyle = getComputedStyle(elem);
         const lineHeight = parseFloat(compStyle.getPropertyValue('line-height'));
+        const paddingTop = parseFloat(compStyle.getPropertyValue('padding-top'));
 
         let maxHeight = 0;
 
@@ -12,7 +13,7 @@ window.mudInputAutoGrow = {
         elem.updateParameters = function (newMaxLines) {
             if (newMaxLines > 0) {
                 // Cap the height to the number of lines specified in the input.
-                maxHeight = lineHeight * newMaxLines;
+                maxHeight = lineHeight * newMaxLines + paddingTop;
             } else {
                 maxHeight = 0;
             }
@@ -40,10 +41,18 @@ window.mudInputAutoGrow = {
             let newHeight = Math.max(minHeight, elem.scrollHeight);
             let initialOverflowY = elem.style.overflowY;
             if (maxHeight > 0 && newHeight > maxHeight) {
+                if(elem.style.maskImage === 'none') {
+                    elem.style.maskImage = `linear-gradient(to bottom, 
+                            transparent  ${paddingTop}px,
+                            black ${paddingTop}px)`;
+                }
                 // Content height exceeds the max height so we'll see a scrollbar.
                 elem.style.overflowY = 'auto';
                 newHeight = maxHeight;
             } else {
+                if(elem.style.maskImage !== 'none') {
+                    elem.style.maskImage = 'none';
+                }
                 // Scrollbar isn't needed and could either flash on resize or could appear
                 // due to rounding inaccuracy in scrollHeight when the display is scaled.
                 elem.style.overflowY = 'hidden';

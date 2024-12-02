@@ -1678,7 +1678,7 @@ namespace MudBlazor.UnitTests.Components
         {
             var comp = Context.RenderComponent<TextFieldAutoGrowTest>();
             comp.FindAll("input.mud-input-root-filled").Count.Should().Be(2);
-            comp.FindAll("textarea.mud-input-root-filled").Count.Should().Be(2);
+            comp.FindAll("textarea.mud-input-root-filled").Count.Should().Be(3);
             comp.FindAll("input.mud-input-root-filled.mud-input-root-margin-dense").Count.Should().Be(1);
             comp.FindAll("textarea.mud-input-root-filled.mud-input-root-margin-dense").Count.Should().Be(1);
             comp.FindAll("input.mud-input-root-outlined").Count.Should().Be(2);
