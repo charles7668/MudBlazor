@@ -37,22 +37,14 @@ window.mudInputAutoGrow = {
                 elem.style.textAlign = null;
             }
 
-            let minHeight = lineHeight * elem.rows;
+            let minHeight = lineHeight * elem.rows + paddingTop;
             let newHeight = Math.max(minHeight, elem.scrollHeight);
             let initialOverflowY = elem.style.overflowY;
             if (maxHeight > 0 && newHeight > maxHeight) {
-                if(elem.style.maskImage === 'none') {
-                    elem.style.maskImage = `linear-gradient(to bottom, 
-                            transparent  ${paddingTop}px,
-                            black ${paddingTop}px)`;
-                }
                 // Content height exceeds the max height so we'll see a scrollbar.
                 elem.style.overflowY = 'auto';
                 newHeight = maxHeight;
             } else {
-                if(elem.style.maskImage !== 'none') {
-                    elem.style.maskImage = 'none';
-                }
                 // Scrollbar isn't needed and could either flash on resize or could appear
                 // due to rounding inaccuracy in scrollHeight when the display is scaled.
                 elem.style.overflowY = 'hidden';

@@ -369,10 +369,16 @@
       margin-top: 0;
       margin-bottom: 0;
       padding: 27px 12px 10px;
+      mask-image: linear-gradient(to bottom,
+        transparent 27px,
+        black 27px);
 
       &.mud-input-root-margin-dense {
         padding-top: 23px;
         padding-bottom: 6px;
+        mask-image: linear-gradient(to bottom,
+          transparent 23px,
+          black 23px);
       }
 
       &:-webkit-autofill {
@@ -383,10 +389,16 @@
       &.mud-input-root-hidden-label {
         padding-top: 18px;
         padding-bottom: 19px;
+        mask-image: linear-gradient(to bottom,
+          transparent 18px,
+          black 18px);
 
         &.mud-input-root-margin-dense {
           padding-top: 10px;
           padding-bottom: 11px;
+          mask-image: linear-gradient(to bottom,
+            transparent 10px,
+            black 10px);
         }
       }
 
@@ -425,7 +437,9 @@
     margin-top: 0;
     margin-bottom: 0;
     padding: 18.5px 14px;
-
+    mask-image: linear-gradient(to bottom,
+      transparent 18.5px,
+      black 18.5px);
 
     &.mud-input-root:-webkit-autofill {
       border-radius: inherit;
@@ -434,6 +448,9 @@
     &.mud-input-root-margin-dense {
       padding-top: 10.5px;
       padding-bottom: 10.5px;
+      mask-image: linear-gradient(to bottom,
+        transparent 10.5px,
+        black 10.5px);
     }
 
     &.mud-input-root-adorned-start {
