@@ -1689,6 +1689,22 @@ namespace MudBlazor.UnitTests.Components
             {
                 elem = comp.Find("legend");
             });
+
+            comp = Context.RenderComponent<MudTextField<string>>(parameters => parameters
+                .Add(p => p.Variant, Variant.Outlined)
+                .Add(p => p.Mask, new PatternMask("0000"))
+                .Add(p => p.Label, "test"));
+            elem = comp.Find("legend");
+            elem.InnerHtml.Should().Be("test");
+
+            comp = Context.RenderComponent<MudTextField<string>>(parameters => parameters
+                .Add(p => p.Variant, Variant.Outlined)
+                .Add(p => p.Mask, new PatternMask("0000"))
+                .Add(p => p.Label, ""));
+            Assert.Throws<ElementNotFoundException>(() =>
+            {
+                elem = comp.Find("legend");
+            });
         }
 #nullable disable
     }
