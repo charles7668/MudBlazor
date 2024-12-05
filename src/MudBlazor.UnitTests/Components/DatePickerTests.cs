@@ -1390,9 +1390,9 @@ namespace MudBlazor.UnitTests.Components
         }
 
         [Test]
+        [SetCulture("en-US")]
         public async Task DatePickerWithFixYearAndFixMonthTest()
         {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             var comp = Context.RenderComponent<FixYearFixMonthTest>();
             await comp.Find("input").TriggerEventAsync("onclick", new MouseEventArgs());
             await Task.Delay(500);
