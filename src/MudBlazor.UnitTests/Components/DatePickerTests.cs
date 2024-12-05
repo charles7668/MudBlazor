@@ -1388,5 +1388,16 @@ namespace MudBlazor.UnitTests.Components
             comp.Find(".mud-button-month").InnerHtml.Should().Contain("April");
             comp.Find(".mud-button-year").InnerHtml.Should().Contain("2003");
         }
+
+        [Test]
+        public async Task DatePickerWithFixYearAndFixMonthTest()
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+            var comp = Context.RenderComponent<FixYearFixMonthTest>();
+            await comp.Find("input").TriggerEventAsync("onclick", new MouseEventArgs());
+            await Task.Delay(500);
+            comp.Find(".mud-button-year").GetInnerText().Should().Be("2022");
+            comp.Find(".mud-picker-calendar-header-transition").GetInnerText().Should().Be("October 2022");
+        }
     }
 }
