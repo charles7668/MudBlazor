@@ -149,11 +149,11 @@ namespace MudBlazor.UnitTests.Components
         }
 
         [Test]
-        public async Task MultiSelectWithEnumTest()
+        public async Task MultiSelectWithValueContainZeroTest()
         {
-            var comp = Context.RenderComponent<MultiSelectWithEnumTest>();
+            var comp = Context.RenderComponent<MultiSelectWithValueContainZeroTest>();
             var inputs = comp.FindAll("input");
-            inputs.Count.Should().Be(2);
+            inputs.Count.Should().Be(3);
             inputs[1].GetAttribute("value").Should().Be("Value2");
             await inputs[1].TriggerEventAsync("onpointerdown", new MouseEventArgs());
             await Task.Delay(500);
