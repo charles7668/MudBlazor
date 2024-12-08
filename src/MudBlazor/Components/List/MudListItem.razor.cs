@@ -43,8 +43,10 @@ namespace MudBlazor
         [Inject]
         protected NavigationManager UriHelper { get; set; } = null!;
 
+        protected MudList<T>? MudList { get; set; } = null;
+
         [CascadingParameter]
-        protected MudList<T>? MudList { get; set; }
+        private IContainerComponent? ContainerComponent { get; set; }
 
         private MudList<T>? TopLevelList => MudList?.TopLevelList;
 
@@ -283,10 +285,12 @@ namespace MudBlazor
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            if (MudList is not null)
+            // only MudList<T> can be interactive with MudListItem<T>
+            if (ContainerComponent is MudList<T> mudList)
             {
-                await MudList.RegisterAsync(this);
+                MudList = mudList;
             }
+            ContainerComponent?.Register(this);
         }
 
         protected async Task OnClickHandlerAsync(MouseEventArgs eventArgs)
@@ -405,13 +409,9 @@ namespace MudBlazor
 
         public void Dispose()
         {
-            if (MudList is null)
-            {
-                return;
-            }
             try
             {
-                MudList.Unregister(this);
+                ContainerComponent?.Unregister(this);
             }
             catch (Exception) { /*ignore*/ }
         }

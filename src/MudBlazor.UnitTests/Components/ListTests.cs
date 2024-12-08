@@ -268,5 +268,37 @@ namespace MudBlazor.UnitTests.Components
             );
             (comp.FindAll("div.mud-list-item-gutters").Count > 0).Should().Be(resultingGutters);
         }
+
+        [Test]
+        public void ListItemWithDifferentGenericType()
+        {
+            // MudListItem inside MudList test
+            Assert.DoesNotThrow(() =>
+            {
+                Context.RenderComponent<MudList<string>>(parameters =>
+                {
+                    parameters.Add(x => x.ChildContent, builder =>
+                    {
+                        builder.OpenComponent<MudListItem<string>>(0);
+                        builder.AddAttribute(1, "Text", "1");
+                        builder.CloseComponent();
+                    });
+                });
+            });
+
+            // MudListItem inside MudList with different generic type test
+            Assert.Throws<ArgumentException>(() =>
+            {
+                Context.RenderComponent<MudList<string>>(parameters =>
+                {
+                    parameters.Add(x => x.ChildContent, builder =>
+                    {
+                        builder.OpenComponent<MudListItem<int>>(0);
+                        builder.AddAttribute(1, "Text", "1");
+                        builder.CloseComponent();
+                    });
+                });
+            });
+        }
     }
 }
