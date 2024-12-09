@@ -176,7 +176,14 @@
       }
     }
 
-    &:focus-within .mud-input-outlined-border , &.mud-shrink .mud-input-outlined-border {
+    &.mud-shrink .mud-input-outlined-border {
+      & legend {
+        width: auto;
+        padding: 0 5px;
+      }
+    }
+
+    &:focus-within .mud-input-outlined-border, &:focus-within .mud-shrink .mud-input-outlined-border {
       & legend {
         width: auto;
         padding: 0 5px;
