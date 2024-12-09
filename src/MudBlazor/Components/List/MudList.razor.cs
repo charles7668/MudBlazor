@@ -295,22 +295,22 @@ namespace MudBlazor
             UpdateSelectedItem(_selectedValueState);
         }
 
-        private void RegisterMudListItem(MudListItem<T> item)
+        private async Task RegisterMudListItem(MudListItem<T> item)
         {
             _items.Add(item);
             if (SelectedValue is not null && Equals(item.GetValue(), SelectedValue))
             {
                 item.SetSelected(true);
-                _selectedValueState.SetValueAsync(item.GetValue()).Wait();
+                await _selectedValueState.SetValueAsync(item.GetValue());
             }
         }
 
-        void IContainerComponent.Register(object item)
+        async Task IContainerComponent.Register(object item)
         {
             switch (item)
             {
                 case MudListItem<T> mudListItem:
-                    RegisterMudListItem(mudListItem);
+                    await RegisterMudListItem(mudListItem);
                     return;
                 default:
                     throw new ArgumentException(@"item must be typeof MudList<T> or MudListItem<T>", nameof(item));
@@ -332,13 +332,13 @@ namespace MudBlazor
             _items.Remove(item);
         }
 
-        void IContainerComponent.Unregister(object item)
+        Task IContainerComponent.Unregister(object item)
         {
             switch (item)
             {
                 case MudListItem<T> mudListItem:
                     UnregisterMudListItem(mudListItem);
-                    return;
+                    return Task.CompletedTask;
                 default:
                     throw new ArgumentException(@"item must be typeof MudList<T> or MudListItem<T>", nameof(item));
             }

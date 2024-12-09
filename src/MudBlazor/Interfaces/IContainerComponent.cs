@@ -2,6 +2,6 @@
 
 internal interface IContainerComponent
 {
-    public void Register(object item);
-    public void Unregister(object item);
+    public Task Register(object item);
+    public Task Unregister(object item);
 }

@@ -13,7 +13,7 @@ namespace MudBlazor
     /// <typeparam name="T">The type of item being listed.</typeparam>
     /// <seealso cref="MudList{T}"/>
     /// <seealso cref="MudListSubheader"/>
-    public partial class MudListItem<T> : MudComponentBase, IDisposable
+    public partial class MudListItem<T> : MudComponentBase, IAsyncDisposable
     {
         private bool _selected;
         private bool MultiSelection => MudList?.SelectionMode == SelectionMode.MultiSelection;
@@ -290,7 +290,9 @@ namespace MudBlazor
             {
                 MudList = mudList;
             }
-            ContainerComponent?.Register(this);
+
+            if (ContainerComponent != null)
+                await ContainerComponent.Register(this);
         }
 
         protected async Task OnClickHandlerAsync(MouseEventArgs eventArgs)
@@ -407,11 +409,12 @@ namespace MudBlazor
 
         private bool GetClickPropagation() => false;
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             try
             {
-                ContainerComponent?.Unregister(this);
+                if (ContainerComponent != null)
+                    await ContainerComponent.Unregister(this);
             }
             catch (Exception) { /*ignore*/ }
         }

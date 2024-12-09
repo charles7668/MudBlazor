@@ -272,33 +272,26 @@ namespace MudBlazor.UnitTests.Components
         [Test]
         public void ListItemWithDifferentGenericType()
         {
-            // MudListItem inside MudList test
-            Assert.DoesNotThrow(() =>
+            void RenderFunc<TList, TListItem>()
             {
-                Context.RenderComponent<MudList<string>>(parameters =>
+                Context.RenderComponent<MudList<TList>>(parameters =>
                 {
                     parameters.Add(x => x.ChildContent, builder =>
                     {
-                        builder.OpenComponent<MudListItem<string>>(0);
+                        builder.OpenComponent<MudListItem<TListItem>>(0);
                         builder.AddAttribute(1, "Text", "1");
                         builder.CloseComponent();
                     });
                 });
-            });
+            }
 
-            // MudListItem inside MudList with different generic type test
-            Assert.Throws<ArgumentException>(() =>
-            {
-                Context.RenderComponent<MudList<string>>(parameters =>
-                {
-                    parameters.Add(x => x.ChildContent, builder =>
-                    {
-                        builder.OpenComponent<MudListItem<int>>(0);
-                        builder.AddAttribute(1, "Text", "1");
-                        builder.CloseComponent();
-                    });
-                });
-            });
+            // Render same generic type
+            var action = RenderFunc<string, string>;
+            action.Should().NotThrow();
+
+            // Render different generic type
+            action = RenderFunc<string, int>;
+            action.Should().Throw<ArgumentException>();
         }
     }
 }
