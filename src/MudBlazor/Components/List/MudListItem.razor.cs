@@ -13,7 +13,7 @@ namespace MudBlazor
     /// <typeparam name="T">The type of item being listed.</typeparam>
     /// <seealso cref="MudList{T}"/>
     /// <seealso cref="MudListSubheader"/>
-    public partial class MudListItem<T> : MudComponentBase, IAsyncDisposable
+    public partial class MudListItem<T> : MudComponentBase, IDisposable
     {
         private bool _selected;
         private bool MultiSelection => MudList?.SelectionMode == SelectionMode.MultiSelection;
@@ -46,7 +46,7 @@ namespace MudBlazor
         protected MudList<T>? MudList { get; set; } = null;
 
         [CascadingParameter]
-        private IContainerComponent? ContainerComponent { get; set; }
+        private MudComponentBase? ContainerComponent { get; set; }
 
         private MudList<T>? TopLevelList => MudList?.TopLevelList;
 
@@ -285,14 +285,16 @@ namespace MudBlazor
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+            if (ContainerComponent is null)
+                return;
             // only MudList<T> can be interactive with MudListItem<T>
-            if (ContainerComponent is MudList<T> mudList)
+            if (ContainerComponent is not MudList<T> mudList)
             {
-                MudList = mudList;
+                throw new ArgumentException($"MudListItem<{typeof(T)}> must be a child of MudList<{typeof(T)}>");
             }
 
-            if (ContainerComponent != null)
-                await ContainerComponent.Register(this);
+            MudList = mudList;
+            await MudList.RegisterAsync(this);
         }
 
         protected async Task OnClickHandlerAsync(MouseEventArgs eventArgs)
@@ -409,12 +411,11 @@ namespace MudBlazor
 
         private bool GetClickPropagation() => false;
 
-        public async ValueTask DisposeAsync()
+        public void Dispose()
         {
             try
             {
-                if (ContainerComponent != null)
-                    await ContainerComponent.Unregister(this);
+                MudList?.Unregister(this);
             }
             catch (Exception) { /*ignore*/ }
         }

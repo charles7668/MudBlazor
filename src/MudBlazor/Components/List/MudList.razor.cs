@@ -16,7 +16,7 @@ namespace MudBlazor
     /// <typeparam name="T">The type of item being listed.</typeparam>
     /// <seealso cref="MudListItem{T}"/>
     /// <seealso cref="MudListSubheader"/>
-    public partial class MudList<T> : MudComponentBase, IDisposable, IContainerComponent
+    public partial class MudList<T> : MudComponentBase, IDisposable
     {
         public MudList()
         {
@@ -233,7 +233,7 @@ namespace MudBlazor
             if (ParentList is not null)
             {
                 TopLevelList = ParentList.TopLevelList;
-                ParentList.RegisterMudList(this);
+                ParentList.Register(this);
             }
         }
 
@@ -295,7 +295,7 @@ namespace MudBlazor
             UpdateSelectedItem(_selectedValueState);
         }
 
-        private async Task RegisterMudListItem(MudListItem<T> item)
+        internal async Task RegisterAsync(MudListItem<T> item)
         {
             _items.Add(item);
             if (SelectedValue is not null && Equals(item.GetValue(), SelectedValue))
@@ -305,43 +305,19 @@ namespace MudBlazor
             }
         }
 
-        async Task IContainerComponent.Register(object item)
-        {
-            switch (item)
-            {
-                case MudListItem<T> mudListItem:
-                    await RegisterMudListItem(mudListItem);
-                    return;
-                default:
-                    throw new ArgumentException(@"item must be typeof MudList<T> or MudListItem<T>", nameof(item));
-            }
-        }
-
-        private void RegisterMudList(MudList<T> child)
-        {
-            _childLists.Add(child);
-        }
-
-        private void UnregisterMudList(MudList<T> child)
-        {
-            _childLists.Remove(child);
-        }
-
-        private void UnregisterMudListItem(MudListItem<T> item)
+        internal void Unregister(MudListItem<T> item)
         {
             _items.Remove(item);
         }
 
-        Task IContainerComponent.Unregister(object item)
+        internal void Register(MudList<T> child)
         {
-            switch (item)
-            {
-                case MudListItem<T> mudListItem:
-                    UnregisterMudListItem(mudListItem);
-                    return Task.CompletedTask;
-                default:
-                    throw new ArgumentException(@"item must be typeof MudList<T> or MudListItem<T>", nameof(item));
-            }
+            _childLists.Add(child);
+        }
+
+        internal void Unregister(MudList<T> child)
+        {
+            _childLists.Remove(child);
         }
 
         internal bool GetDisabled() => Disabled || (ParentList?.Disabled ?? false);
@@ -429,7 +405,7 @@ namespace MudBlazor
         /// </summary>
         public void Dispose()
         {
-            ParentList?.UnregisterMudList(this);
+            ParentList?.Unregister(this);
         }
     }
 }
