@@ -45,6 +45,9 @@ namespace MudBlazor
 
         protected MudList<T>? MudList { get; set; } = null;
 
+        /// <summary>
+        /// Parent list is passed down here to be then cast and stored in the MudList field
+        /// </summary>
         [CascadingParameter]
         private MudComponentBase? ContainerComponent { get; set; }
 
@@ -287,10 +290,10 @@ namespace MudBlazor
             await base.OnInitializedAsync();
             if (ContainerComponent is null)
                 return;
-            // only MudList<T> can be interactive with MudListItem<T>
+            // If there is a type mismatch the cast to MudList<T> will fail.
             if (ContainerComponent is not MudList<T> mudList)
             {
-                throw new ArgumentException($"MudListItem<{typeof(T)}> must be a child of MudList<{typeof(T)}>");
+                throw new ArgumentException($"Type mismatch! A MudList<{typeof(T)}> can only contain items of type MudListItem<{typeof(T)}>.");
             }
 
             MudList = mudList;
